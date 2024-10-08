@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"github.com/asaskevich/govalidator"
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
@@ -38,7 +39,7 @@ func ShortenURL(c *fiber.Ctx) error {
 	r2 := database.CreateClient(1)
 	defer r2.Close()
 	val, err := r2.Get(database.Ctx, c.IP()).Result()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		_ = r2.Set(database.Ctx, c.IP(), os.Getenv("API_QUOTA"), 30*60*time.Second).Err()
 	} else {
 		val, _ = r2.Get(database.Ctx, c.IP()).Result()
