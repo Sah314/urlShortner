@@ -1,0 +1,40 @@
+datasource db {
+  // could be postgresql or mysql
+  provider = "postgresql"
+  url      = "postgresql://urlshortner_db:urlshortner_password@localhost:5432/urlshortner_db"
+}
+
+generator db {
+  provider = "go run github.com/steebchen/prisma-client-go"
+}
+
+model User{
+  id        String   @id @default(cuid())
+  FirstName String   @unique
+  LastName  String   @unique
+  email     String   @unique
+  password  String
+  URLs      Url[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Url{
+  id        String   @id @default(cuid())
+  shortUrl  String   @unique
+  longUrl   String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id])
+  Clicks    Click[]
+}
+
+model Click{
+id        String   @id @default(cuid())
+urlId     String
+ipAddress String
+userAgent String
+referrer  String?
+createdAt DateTime @default(now())
+Url       Url      @relation(fields: [urlId], references: [id], onDelete: Cascade)
+}
